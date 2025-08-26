@@ -27,7 +27,7 @@ const GameController = (() => {
     const player2 = Player("Player 2", "O");
     let currentPlayer = player1;
     let gameOver = false;
-
+    let message = "Player 1's turn (X)";
     const playRound = (index) => {
         if (gameOver) {
             console.log("Game over! Reset to play again.");
@@ -35,30 +35,29 @@ const GameController = (() => {
         }
 
         if (Gameboard.setMark(index, currentPlayer.marker)) {
-            console.log(`${currentPlayer.name} placed ${currentPlayer.marker} at position ${index}`);
             printBoard();
 
             if (checkWin(currentPlayer.marker)) {
                 console.log(` ${currentPlayer.name} wins!`);
                 gameOver = true;
+                message = `${currentPlayer.name} wins!`;
                 return;
             }
 
             if (checkTie()) {
                 console.log("It's a tie!");
                 gameOver = true;
+                message = "It's a tie!";
                 return;
             }
 
             switchTurn();
-        } else {
-            console.log("Spot already taken, choose another!");
         }
     };
 
     const switchTurn = () => {
         currentPlayer = currentPlayer === player1 ? player2 : player1;
-        console.log(`Now it's ${currentPlayer.name}'s turn!`);
+        message = `${currentPlayer.name}'s turn (${currentPlayer.marker})`;
     };
 
     const checkWin = (marker) => {
@@ -80,10 +79,10 @@ const GameController = (() => {
         Gameboard.resetBoard();
         currentPlayer = player1;
         gameOver = false;
-        console.log("Game reset! Player 1 starts.");
+        message = "Player 1's turn (X)";
         printBoard();
     };
-
+    const getMessage = () => message;
     const printBoard = () => {
         const board = Gameboard.getBoard();
         console.log(`
@@ -95,10 +94,31 @@ const GameController = (() => {
         `);
     };
 
-    return { playRound, resetGame, printBoard };
+    return { playRound, resetGame, printBoard, getMessage };
 })();
 
-GameController.resetGame();
-GameController.playRound(0);
-GameController.playRound(4);
-GameController.playRound(8);
+const displayController = (() => {
+    const boardElement = document.getElementById("board");
+    const messageElement = document.getElementById("message");
+
+    const render = () => {
+        const board = Gameboard.getBoard();
+        const cells = document.querySelectorAll(".cell");
+        cells.forEach((cell, index) => {
+            cell.textContent = board[index];
+        });
+
+        messageElement.textContent = GameController.getMessage();
+    };
+
+    boardElement.addEventListener("click", (e) => {
+        if (e.target.classList.contains("cell")) {
+            const index = Number(e.target.dataset.index);
+            GameController.playRound(index);
+            render();
+        }
+    });
+
+    GameController.resetGame();
+    render();
+})();
