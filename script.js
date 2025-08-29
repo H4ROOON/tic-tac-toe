@@ -25,9 +25,16 @@ const Player = (name, marker) => {
 const GameController = (() => {
     const player1 = Player("Player 1", "X");
     const player2 = Player("Player 2", "O");
+    const setPlayers = (name1, name2) => {
+        player1.name = name1 || "Player 1";
+        player2.name = name2 || "Player 2";
+        message = `${player1.name}'s turn (${player1.marker})`;
+    };
+
     let currentPlayer = player1;
     let gameOver = false;
     let message = "Player 1's turn (X)";
+
     const playRound = (index) => {
         if (gameOver) {
             console.log("Game over! Reset to play again.");
@@ -94,12 +101,21 @@ const GameController = (() => {
         `);
     };
 
-    return { playRound, resetGame, printBoard, getMessage };
+    return { playRound, resetGame, printBoard, getMessage, setPlayers };
 })();
 
 const displayController = (() => {
     const boardElement = document.getElementById("board");
     const messageElement = document.getElementById("message");
+    const startBtn = document.getElementById("startBtn");
+    const p1Input = document.getElementById("player1Name");
+    const p2Input = document.getElementById("player2Name");
+
+    startBtn.addEventListener("click", () => {
+        GameController.setPlayers(p1Input.value, p2Input.value);
+        GameController.resetGame();
+        render();
+    });
 
     const render = () => {
         const board = Gameboard.getBoard();
